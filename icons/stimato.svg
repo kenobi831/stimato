@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title>Stimato</title>
+  <rect width="512" height="512" rx="112" fill="#101317"/>
+  <rect x="56" y="56" width="400" height="400" rx="82" fill="#f26a1f"/>
+  <path d="M91 356h330v42H91z" fill="#101317"/>
+  <path d="M91 356h330v16H91z" fill="#101317"/>
+  <g stroke="#101317" stroke-width="9">
+    <path d="M119 356v-25M153 356v-15M187 356v-25M221 356v-15M255 356v-25M289 356v-15M323 356v-25M357 356v-15M391 356v-25"/>
+  </g>
+  <path d="M332 153c-22-14-49-22-79-22-58 0-102 28-102 72 0 80 148 37 148 94 0 15-18 27-46 27-27 0-55-10-78-29l-32 44c29 27 68 42 109 42 62 0 107-30 107-77 0-81-148-39-148-94 0-14 16-24 42-24 22 0 46 8 68 22z" fill="#101317"/>
+</svg>

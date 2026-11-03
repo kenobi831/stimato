@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stimato Beta — Free Flooring Estimate Calculator</title>
+<meta name="description" content="Build a fast flooring estimate from the jobsite. Free, no account required, and no estimate is saved by Stimato.">
+<meta name="theme-color" content="#101317">
+<link rel="canonical" href="https://stimato.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Stimato">
+<meta property="og:url" content="https://stimato.app/">
+<meta property="og:title" content="Stimato — Free Flooring Estimate Calculator">
+<meta property="og:description" content="Build a fast flooring estimate from the jobsite. Free, no account required, and no estimate is saved by Stimato.">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Stimato","url":"https://stimato.app/","description":"Free flooring estimate calculator for contractors. Measure rooms, add materials and labor, and print or copy a professional estimate.","applicationCategory":"BusinessApplication","operatingSystem":"Any","browserRequirements":"Requires JavaScript","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stimato">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/stimato.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101317; --card:#16191e; --card2:#232932; --line:#333B45;
+    --text:#F2F5F7; --muted:#9BA6B0; --accent:#F26A1F; --accent-dk:#D4560F;
+    --green:#34B27C; --red:#E45A4E;
+    --disp:"Barlow Condensed",system-ui,sans-serif;
+    --body:"Barlow",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{padding-bottom:120px}
+
+  header.app{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px}
+  header.app .wordmark{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+  header.app .wordmark span{color:var(--accent)}
+  header.app .brand{display:flex;align-items:center;gap:10px}
+  .logo{position:relative;width:32px;height:32px;border-radius:9px;overflow:hidden;flex:none;display:block;background:linear-gradient(155deg,#FB8036,var(--accent) 55%,var(--accent-dk))}
+  .logo b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-bottom:5px;font-family:var(--disp);font-weight:700;font-size:26px;line-height:1;color:#101317}
+  .logo::before{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:#101317}
+  .logo::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:5px;background:repeating-linear-gradient(90deg,#101317 0 1px,transparent 1px 4px)}
+  .hbtns{display:flex;gap:8px;flex:none}
+  .icobtn{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:8px;
+    padding:8px 12px;font-family:var(--disp);font-size:14px;letter-spacing:.05em;line-height:1.1;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+  .icobtn:active{background:var(--card2)}
+
+  main{max-width:680px;margin:0 auto;padding:16px}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .card .body{padding:14px}
+  .docno{display:inline-flex;align-items:center;color:var(--accent);letter-spacing:.06em}
+  .docno input{width:3.4ch;box-sizing:content-box;padding:2px 4px;margin-left:2px;height:auto;line-height:1.2;
+    font:inherit;font-size:16px;color:var(--accent);text-align:center;background:var(--bg);border:1px dashed var(--accent);border-radius:6px}
+
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
+  input,textarea,select{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);
+    padding:10px 12px;font-family:var(--body);font-size:16px;outline:none}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  input{line-height:20px}
+  /* iOS Safari gives native date inputs an intrinsic width that ignores
+     width:100%, so they spill out of grid cells. Dropping the native
+     appearance makes them respect their container like any other input. */
+  input[type="date"]{-webkit-appearance:none;appearance:none;display:block;height:42px;text-align:left}
+  input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
+  textarea{resize:vertical;min-height:70px}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .grid2 > *, .grid3 > *{min-width:0}
+  .field{margin-bottom:10px}
+  .label-short{display:none}
+
+  /* rooms */
+  .room{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+  .room .top{display:flex;gap:8px;margin-bottom:8px}
+  .room .top input{flex:1}
+  .room .dims{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-items:end}
+  .room .sqf{font-family:var(--disp);font-size:20px;font-weight:700;color:var(--accent);text-align:right;padding-bottom:8px}
+  .room .sqf small{display:block;font-size:10px;color:var(--muted);font-weight:500;letter-spacing:.08em}
+  .room .dims input:disabled{opacity:.4}
+  .wtog{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:var(--text)}
+  .wtog small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+  .wtog input{position:absolute;opacity:0;width:0;height:0}
+  .wtog .sw{position:relative;flex:none;width:46px;height:26px;border-radius:13px;background:var(--line);transition:background .15s}
+  .wtog .sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s}
+  .wtog input:checked+.sw{background:var(--accent)}
+  .wtog input:checked+.sw::after{transform:translateX(20px)}
+  .wtog input:focus-visible+.sw{outline:2px solid var(--accent);outline-offset:2px}
+  .del{background:none;border:none;color:var(--red);font-size:20px;cursor:pointer;padding:4px 8px}
+
+  /* items */
+  .item{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+  .item .row1{display:flex;gap:8px;margin-bottom:8px}
+  .item .row1 input{flex:1}
+  .itemActions{display:flex;gap:4px;align-items:center}
+  .movebtn{background:var(--bg);border:1px solid var(--line);color:var(--accent);border-radius:8px;
+    font-size:16px;line-height:1;cursor:pointer;padding:6px 8px;min-width:32px}
+  .movebtn:disabled{color:var(--muted);opacity:.45;cursor:not-allowed}
+  .item .row2{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-items:end}
+  .item .amt{font-family:var(--disp);font-size:20px;font-weight:700;text-align:right;padding-bottom:8px}
+  .sync{background:var(--bg);border:1px solid var(--line);color:var(--accent);border-radius:8px;font-size:12px;
+    padding:6px;cursor:pointer;width:100%;font-family:var(--disp);letter-spacing:.05em}
+
+  .quick{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 14px}
+  .chip{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:999px;
+    padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500}
+  .chip:active{border-color:var(--accent);color:var(--accent)}
+  .chip b{color:var(--accent);font-weight:600}
+  .qgroup{width:100%;font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
+  .qgroup:first-child{border-top:none;margin-top:0;padding-top:0}
+  .chip-other{border-style:dashed;border-color:var(--accent);color:var(--accent);font-weight:600}
+  .qsep{width:100%;border-top:1px solid var(--line);margin-top:4px}
+  .mktrow{width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:6px}
+  .mktrow label{margin:0;white-space:nowrap}
+  .mktrow select{flex:1}
+  .mktrow .hint{flex-basis:100%;padding-left:0}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:7px;padding-left:2px}
+  .finefoot{font-size:11.5px;color:var(--muted);line-height:1.5;padding:0 4px 8px}
+  .finefoot a{color:var(--accent);text-decoration:none}
+  /* about / FAQ (crawlable copy below the calculator) */
+  .about{max-width:680px;margin:8px auto 0;padding:0 16px;color:var(--muted);font-size:15px;line-height:1.6}
+  .about h1{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);line-height:1.15;margin-bottom:10px}
+  .about h2{font-family:var(--disp);font-weight:600;font-size:17px;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin:22px 0 8px}
+  .about p{margin-bottom:10px}
+  .about ul{margin:0 0 10px 20px}
+  .about strong{color:var(--text);font-weight:600}
+  .about details{border-top:1px solid var(--line);padding:10px 0}
+  .about details:last-of-type{border-bottom:1px solid var(--line)}
+  .about summary{cursor:pointer;color:var(--text);font-weight:600;list-style-position:outside}
+  .about details p{margin:8px 0 0}
+
+  .addbtn{width:100%;background:none;border:1px dashed var(--line);color:var(--accent);border-radius:10px;
+    padding:12px;font-family:var(--disp);font-size:15px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-weight:600}
+
+  /* totals */
+  .totrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .totrow:last-child{border:none}
+  .totrow .lbl{color:var(--muted)}
+  .totrow input{width:90px;text-align:right;padding:6px 8px;font-size:15px}
+  .totrow.big{font-family:var(--disp);font-size:24px;font-weight:700}
+  .totrow.big .val{color:var(--accent)}
+  .inline{display:flex;align-items:center;gap:6px}
+
+  /* sticky tape bar */
+  .tape{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--accent);color:#101317;
+    display:flex;align-items:stretch;font-family:var(--disp)}
+  .tape .cell{flex:1;padding:10px 14px;border-right:2px dashed rgba(0,0,0,.25)}
+  .tape .cell:last-child{border:none}
+  .tape small{display:block;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+  .tape b{font-size:22px;font-weight:700}
+  .tape .ticks{height:6px;background:repeating-linear-gradient(90deg,#101317 0 2px,transparent 2px 14px)}
+
+  /* action buttons */
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .btn{border:none;border-radius:10px;padding:14px;font-family:var(--disp);font-size:16px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#101317}
+  .btn.primary:active{background:var(--accent-dk)}
+  .btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+  .btn.wide{grid-column:1/-1}
+
+  /* saved list + modals */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end;justify-content:center}
+  .modal.open{display:flex}
+  .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;max-height:85vh;overflow:auto;padding:16px}
+  .sheet h3{font-family:var(--disp);font-size:18px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between}
+  .sheet h3 button{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+  .saved{display:flex;justify-content:space-between;align-items:center;background:var(--card2);
+    border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px}
+  .saved .info{cursor:pointer;flex:1}
+  .saved .num{font-family:var(--disp);font-weight:700;color:var(--accent)}
+  .saved .sub{font-size:13px;color:var(--muted)}
+  .toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:var(--green);color:#0c0f11;
+    padding:10px 18px;border-radius:999px;font-weight:600;z-index:200;display:none;font-size:14px}
+
+  /* Keep the jobsite header and paired fields stable on narrow iPhones. */
+  @media(max-width:430px){
+    header.app{padding:10px 12px;gap:6px}
+    header.app .brand{gap:7px}
+    header.app .wordmark{font-size:20px}
+    .logo{width:28px;height:28px;border-radius:8px}
+    .logo b{font-size:23px}
+    .hbtns{gap:5px}
+    .icobtn{padding:7px 8px;font-size:12px}
+    /* Keep a compact days field beside the date. */
+    .estimate-dates{grid-template-columns:minmax(0,1fr) 80px;gap:8px}
+    .estimate-dates .field{margin-bottom:0}
+    .estimate-dates input[type="number"]{padding-left:8px;padding-right:8px;text-align:center}
+    .estimate-dates .label-full{display:none}
+    .estimate-dates .label-short{display:inline}
+  }
+
+  /* ===== DESKTOP / LAPTOP ===== */
+  @media(min-width:900px){
+    body{padding-bottom:90px}
+    header.app{padding:14px 28px}
+    header.app .wordmark{font-size:26px}
+    main{max-width:1180px;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start;padding:24px}
+    .colR{position:sticky;top:78px}
+    .modal{align-items:center;padding:24px}
+    .sheet{border-radius:16px;max-height:80vh}
+    .tape{left:50%;transform:translateX(-50%);max-width:1180px;border-radius:12px 12px 0 0;overflow:hidden}
+    .tape b{font-size:26px}
+    .quick .chip:hover{border-color:var(--accent);color:var(--accent)}
+    .btn:hover{filter:brightness(1.08)}
+    .icobtn:hover{border-color:var(--accent)}
+  }
+
+  /* PRINT DOC */
+  #printDoc{display:none}
+  @media print{
+    body *{visibility:hidden}
+    body{background:#fff;padding:0}
+    #printDoc,#printDoc *{visibility:visible}
+    #printDoc{display:block;position:absolute;top:0;left:0;width:100%;background:#fff;color:#111;
+      font-family:"Barlow",Arial,sans-serif;padding:32px;font-size:13px}
+    .p-head{display:flex;justify-content:space-between;border-bottom:4px solid #F26A1F;padding-bottom:14px;margin-bottom:18px}
+    .p-co{font-family:"Barlow Condensed",Arial;font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .p-co small{display:block;font-size:12px;font-weight:400;color:#555;text-transform:none;letter-spacing:0}
+    .p-est{text-align:right}
+    .p-est .t{font-family:"Barlow Condensed",Arial;font-size:22px;font-weight:700;color:#F26A1F;text-transform:uppercase}
+    .p-cols{display:flex;gap:40px;margin-bottom:18px}
+    .p-cols h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:4px}
+    table.p-tbl{width:100%;border-collapse:collapse;margin-bottom:6px}
+    .p-tbl th{font-family:"Barlow Condensed",Arial;text-align:left;font-size:12px;text-transform:uppercase;
+      letter-spacing:.08em;border-bottom:2px solid #111;padding:6px 4px}
+    .p-tbl td{padding:7px 4px;border-bottom:1px solid #ddd}
+    .p-tbl .r{text-align:right}
+    .p-tots{width:280px;margin-left:auto;margin-top:10px}
+    .p-tots div{display:flex;justify-content:space-between;padding:4px 0}
+    .p-tots .grand{border-top:2px solid #111;font-family:"Barlow Condensed",Arial;font-size:18px;font-weight:700;padding-top:8px}
+    .p-tots .grand span:last-child{color:#F26A1F}
+    .p-notes{margin-top:22px;font-size:12px;color:#444;white-space:pre-wrap;border-top:1px solid #ddd;padding-top:12px}
+    .p-sign{margin-top:44px;display:flex;gap:60px}
+    .p-sign div{flex:1;border-top:1px solid #111;padding-top:6px;font-size:11px;color:#666}
+  }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="brand"><span class="logo" aria-hidden="true"><b>S</b></span><div class="wordmark">Stima<span>to</span></div></div>
+  <div class="hbtns">
+    <button class="icobtn" onclick="openInstall()">Get app</button>
+    <button class="icobtn" onclick="openNoSave()">How it works</button>
+    <button class="icobtn" onclick="openSettings()">⚙</button>
+  </div>
+</header>
+
+<main>
+ <div class="colL">
+  <!-- ESTIMATE INFO -->
+  <section class="card">
+    <h2><span id="docLabel">Estimate</span><span class="docno"><span id="estNum"></span>-<input id="estSeq" value="01" inputmode="numeric" maxlength="3" aria-label="Estimate number for this customer" title="Estimate number for this customer — tap to change" oninput="setEstSeq(this)" onblur="this.value=estSeq"></span></h2>
+    <div class="body">
+      <div class="grid2 estimate-dates">
+        <div class="field"><label>Date</label><input type="date" id="estDate" oninput="updateDocUI()"></div>
+        <div class="field"><label><span class="label-full">Valid for (days)</span><span class="label-short">Days</span></label><input type="number" id="validDays" value="30" min="0" inputmode="numeric"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENT -->
+  <section class="card">
+    <h2>Client</h2>
+    <div class="body">
+      <div class="field"><label>Name</label><input id="cName" placeholder="Client name" autocomplete="off"></div>
+      <div class="grid2">
+        <div class="field"><label>Phone</label><input id="cPhone" inputmode="tel" placeholder="(831) 555-0100"></div>
+        <div class="field"><label>Email</label><input id="cEmail" inputmode="email" placeholder="client@email.com"></div>
+      </div>
+      <div class="field"><label>Job address</label><input id="cAddr" placeholder="123 Main St, Salinas CA"></div>
+    </div>
+  </section>
+
+  <!-- ROOMS -->
+  <section class="card">
+    <h2>Rooms / Areas <span style="display:flex;gap:6px"><button class="icobtn" onclick="addRoom()">+ Room</button><button class="icobtn" onclick="addArea()">+ Whole area</button></span></h2>
+    <div class="body">
+      <label class="wtog"><span>Add waste<small id="wasteSub">Each room uses its waste %</small></span>
+        <input type="checkbox" id="wasteSw" checked onchange="toggleWaste(this.checked)"><span class="sw"></span></label>
+      <div id="rooms"></div>
+    </div>
+  </section>
+
+  <!-- LINE ITEMS -->
+  <section class="card">
+    <h2>Line Items <button class="icobtn" onclick="addItem()">+ Add</button></h2>
+    <div class="body" id="items"></div>
+    <div class="quick" id="mktRow"></div>
+    <div class="quick" id="quickChips"></div>
+  </section>
+ </div>
+
+ <div class="colR">
+  <!-- TOTALS -->
+  <section class="card">
+    <h2>Totals</h2>
+    <div class="body">
+      <div class="totrow"><span class="lbl">Subtotal</span><span id="tSub">$0.00</span></div>
+      <div class="totrow"><span class="lbl">Discount ($)</span><input type="number" id="tDisc" value="0" min="0" step="0.01" inputmode="decimal" onchange="calc()" oninput="calc()"></div>
+      <div class="totrow"><span class="lbl inline">Tax %<span style="font-size:11px;color:var(--muted)">(applies to the subtotal after discount)</span></span><input type="number" id="tTax" value="0" min="0" max="100" step="0.01" inputmode="decimal" onchange="calc()" oninput="calc()"></div>
+      <div class="totrow"><span class="lbl">Tax amount</span><span id="tTaxAmt">$0.00</span></div>
+      <div class="totrow big"><span>Total</span><span class="val" id="tTotal">$0.00</span></div>
+      <div class="totrow est-only"><span class="lbl">Deposit %</span><input type="number" id="tDep" value="50" min="0" max="100" step="0.01" inputmode="decimal" onchange="calc()" oninput="calc()"></div>
+      <div class="totrow est-only"><span class="lbl">Deposit due</span><span id="tDepAmt">$0.00</span></div>
+      <div class="totrow est-only"><span class="lbl">Balance on completion</span><span id="tBal">$0.00</span></div>
+      <div class="totrow inv-only" style="display:none"><span class="lbl">Paid to date</span><span id="tPaid">$0.00</span></div>
+      <div class="totrow big inv-only" style="display:none"><span>Balance due</span><span class="val" id="tDue">$0.00</span></div>
+    </div>
+  </section>
+
+  <!-- PAYMENTS (invoice mode) -->
+  <section class="card inv-only" id="payCard" style="display:none">
+    <h2>Payments Received <button class="icobtn" onclick="addPayment()">+ Add</button></h2>
+    <div class="body" id="payments"></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="card">
+    <h2>Notes & Terms</h2>
+    <div class="body"><textarea id="notes" rows="4"></textarea></div>
+  </section>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn primary" onclick="openNoSave()">Save online</button>
+    <button class="btn ghost" onclick="newEstimate()">New</button>
+    <button class="btn ghost" onclick="printEstimate()">PDF / Print</button>
+    <button class="btn ghost" onclick="copyText()">Copy Text</button>
+    <button class="btn ghost wide" id="convertBtn" onclick="openAccountRequired()">⇄ Convert to Invoice</button>
+    <button class="btn primary wide" id="emailBtn" onclick="emailEstimate()">✉ Email Estimate</button>
+  </div>
+  <div class="finefoot">
+    Set your own pricing and verify all taxes, scope, and contract requirements. This beta does not save estimates; print to PDF or copy the text before leaving.
+    <a href="mailto:feedback@stimato.app?subject=Stimato%20beta%20feedback">Send feedback</a>
+  </div>
+ </div>
+</main>
+
+<!-- ABOUT / FAQ -->
+<section class="about" aria-labelledby="aboutTitle">
+  <h1 id="aboutTitle">Free Flooring Estimate Calculator for Contractors</h1>
+  <p>Stimato turns jobsite measurements into a clean, professional flooring estimate in a few minutes. Enter room dimensions, add a waste allowance, list your materials, labor, and removal, then print a PDF or copy the estimate into a text or email for your client.</p>
+  <ul>
+    <li><strong>Square footage by room</strong> — length × width for each room, or one whole-area total.</li>
+    <li><strong>Waste factor built in</strong> — set a percentage per room and see the square footage to order.</li>
+    <li><strong>Your own pricing</strong> — material, labor, tear-out, and haul-away at the rates you set, with tax and deposit.</li>
+    <li><strong>Ready to send</strong> — print or save as PDF, copy as text, or email straight from your phone.</li>
+    <li><strong>Free, no account</strong> — works in any browser and installs to your home screen. Estimates are not saved by Stimato.</li>
+  </ul>
+  <p>Working in the Salinas / Monterey County or Morgan Hill / South Bay areas? Optional local reference price ranges are available in the Line Items section. They are references only, never quotes, and never fill in a rate for you.</p>
+
+  <h2>Flooring estimate FAQ</h2>
+  <details>
+    <summary>How do I calculate flooring square footage?</summary>
+    <p>Measure the length and width of each room in feet and multiply them. A 12 ft × 14 ft room is 168 sq ft. Split L-shaped rooms into rectangles, measure each one, and add them together. Stimato does this for every room you enter and keeps a running total.</p>
+  </details>
+  <details>
+    <summary>How much waste should I add for flooring?</summary>
+    <p>About 8% is common for straight installs of laminate, vinyl plank, and hardwood. Plan for about 12% for diagonal or herringbone layouts, rooms with many angles, or patterned tile. Stimato defaults to 8% and lets you change it per room.</p>
+  </details>
+  <details>
+    <summary>What should a flooring estimate include?</summary>
+    <p>A clear estimate lists the area in square feet, the material, installation labor, removal and disposal of old flooring, prep work such as leveling, trim or transitions, tax, the total, any deposit, and how long the price is valid. Stimato has a field for each one.</p>
+  </details>
+  <details>
+    <summary>Is Stimato really free? Do I need an account?</summary>
+    <p>Yes, it is free and no sign-up is needed. Because nothing is stored by Stimato, print to PDF or copy the text before you close the page.</p>
+  </details>
+  <details>
+    <summary>Can I use it on my phone at the jobsite?</summary>
+    <p>Yes. Stimato is built for phones first. On iPhone, open it in Safari, tap Share, then Add to Home Screen. On Android, use Get App or your browser's install option.</p>
+  </details>
+</section>
+
+<!-- STICKY TAPE BAR -->
+<div class="tape">
+  <div style="width:100%">
+    <div class="ticks"></div>
+    <div style="display:flex">
+      <div class="cell"><small>Total Sq Ft</small><b id="tapeSq">0</b></div>
+      <div class="cell"><small>Items</small><b id="tapeItems">0</b></div>
+      <div class="cell" style="text-align:right"><small>Estimate Total</small><b id="tapeTot">$0</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal" id="mSettings">
+  <div class="sheet">
+    <h3>My Company <button onclick="closeModal('mSettings')">✕</button></h3>
+    <div class="field"><label>Company name</label><input id="sCo" placeholder="831 Floors"></div>
+    <div class="grid2">
+      <div class="field"><label>Phone</label><input id="sPhone" inputmode="tel"></div>
+      <div class="field"><label>Email (reply-to)</label><input id="sEmail" inputmode="email"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>License # (optional)</label><input id="sLic"></div>
+      <div class="field"><label>Default tax %</label><input id="sTax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Default waste %</label><input id="sWaste" type="number" value="8" min="0" max="100" inputmode="decimal"></div>
+      <div class="field"><label>Default deposit %</label><input id="sDep" type="number" value="50" min="0" max="100" inputmode="decimal"></div>
+    </div>
+    <div class="field"><label>Logo (shows on printed estimates & invoices)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <img id="sLogoPrev" alt="Logo preview" style="height:42px;max-width:120px;object-fit:contain;border-radius:6px;background:#fff;padding:3px;display:none">
+        <input type="file" id="sLogo" accept="image/*" onchange="logoPicked(this)" style="flex:1">
+        <button type="button" class="icobtn" id="sLogoDel" style="display:none" onclick="removeLogo()">✕ Remove</button>
+      </div>
+    </div>
+    <div class="finefoot">Rates start blank. A rate you enter is reused only while this page stays open. Optional reference ranges appear above the quick-add buttons; they are non-binding references, not quotes.</div>
+    <div class="field"><label>Default terms</label><textarea id="sTerms" rows="4"></textarea></div>
+    <button class="btn primary wide" style="width:100%" onclick="saveSettings()">Apply settings</button>
+  </div>
+</div>
+
+<!-- DEMO PICKER -->
+<div class="modal" id="mDemo">
+  <div class="sheet">
+    <h3>Demo / Tear-out <button onclick="closeModal('mDemo')">✕</button></h3>
+    <div style="color:var(--muted);font-size:13px;margin:-6px 0 12px">What's coming out? Rates include haul-away. Pick one — you can edit the description and price after.</div>
+    <div id="demoList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printDoc"></div>
+
+<!-- ACCOUNT / SAVING NOTICE -->
+<div class="modal" id="mNoSave">
+  <div class="sheet">
+    <h3>Free estimate beta <button onclick="closeModal('mNoSave')">✕</button></h3>
+    <p id="noSaveLead" style="line-height:1.55;color:var(--text);margin-bottom:12px">Stimato lets you build an estimate without an account. This beta does not save your estimate or invoice history.</p>
+    <p id="noSaveDetail" style="line-height:1.55;color:var(--muted);margin-bottom:16px">Before leaving, use <b style="color:var(--text)">PDF / Print</b> to download a copy or <b style="color:var(--text)">Copy Text</b> to send it. Saved estimates and invoice conversion will be available with free accounts in a future release.</p>
+    <button class="btn primary wide" style="width:100%" onclick="closeModal('mNoSave')">Keep estimating</button>
+  </div>
+</div>
+
+<!-- INSTALL APP HELP -->
+<div class="modal" id="mInstall">
+  <div class="sheet">
+    <h3>Install Stimato <button onclick="closeModal('mInstall')">✕</button></h3>
+    <p id="installLead" style="line-height:1.55;color:var(--text);margin-bottom:12px"></p>
+    <p id="installDetail" style="line-height:1.55;color:var(--muted);margin-bottom:16px"></p>
+    <button class="btn primary wide" id="installAction" style="width:100%;display:none" onclick="triggerInstall()">Install app</button>
+    <button class="btn ghost wide" style="width:100%;margin-top:10px" onclick="closeModal('mInstall')">Close</button>
+  </div>
+</div>
+
+<script>
+/* ============ STATE ============ */
+const SET_DEFAULTS = {
+  co:'', phone:'', email:'', lic:'', tax:0, waste:8, dep:50, mkt:'', logo:'',
+  terms:'• Estimate valid for the period shown above.\n• Deposit required to schedule; amount shown above. Balance due on completion.\n• Price includes labor and materials listed. Subfloor repairs beyond normal prep billed at additional cost after inspection.\n• Furniture and appliance moving not included unless listed.\n• Customer to provide clear access to work areas.'
+};
+/* Public beta: all work exists only for this page session. */
+let settings = Object.assign({}, SET_DEFAULTS);
+let rooms=[], items=[];
+let curId=null;
+let docType='estimate', estSeq='01', payments=[];
+const PAY_METHODS=['Cash','Check','Zelle','Venmo','Card','Other'];
+
+/* Quick-add catalog. Rates are always left blank for the contractor.
+   r = optional reference ranges [low, high] shown only after a market is picked.
+   These provisional beta references were last reviewed September 2026; they are
+   not market quotes and the contractor always sets the final rate. */
+const QUICK=[
+  {d:'Material — LVP',u:'sqft',sq:true},
+  {d:'Material — Laminate',u:'sqft',sq:true},
+  {d:'Material — Tile',u:'sqft',sq:true},
+  {d:'Material — Hardwood',u:'sqft',sq:true},
+  {d:'Material — Carpet',u:'sqft',sq:true},
+  {d:'Material — Carpet tile',u:'sqft',sq:true},
+  {d:'Material — Sheet vinyl',u:'sqft',sq:true},
+  {d:'Material — VCT',u:'sqft',sq:true},
+  {d:'LVP install — click-lock',u:'sqft',sq:true,r:{sal:[2.5,4],sb:[3,4.5]}},
+  {d:'LVP install — glue-down',u:'sqft',sq:true,r:{sal:[4,5.25],sb:[4.5,6]}},
+  {d:'Laminate install',u:'sqft',sq:true,r:{sal:[2,3.5],sb:[2.5,4]}},
+  {d:'Tile install — ceramic/porcelain',u:'sqft',sq:true,r:{sal:[6,10],sb:[7,12]}},
+  {d:'Hardwood install — nail-down',u:'sqft',sq:true,r:{sal:[3.5,5.5],sb:[4,6.5]}},
+  {d:'Carpet install — stretch-in',u:'sqft',sq:true,r:{sal:[0.75,1.5],sb:[1,1.75]}},
+  {d:'Carpet install — glue-down',u:'sqft',sq:true,r:{sal:[1,1.75],sb:[1.25,2]}},
+  {d:'Carpet tile install',u:'sqft',sq:true,r:{sal:[0.85,1.6],sb:[1,1.85]}},
+  {d:'Sheet vinyl install',u:'sqft',sq:true,r:{sal:[1.75,3.25],sb:[2,3.75]}},
+  {d:'VCT install',u:'sqft',sq:true,r:{sal:[1.75,2.75],sb:[2,3.25]}},
+  {d:'Demo / tear-out…',demo:true},
+  {d:'Floor prep / patch',u:'sqft',sq:true,r:{sal:[1.25,2.5],sb:[1.5,3]}},
+  {d:'Self-leveler (SLU) — install',u:'sqft',sq:true,r:{sal:[2.5,4],sb:[3,5]}},
+  {d:'Prep labor — hourly',u:'hr',r:{sal:[55,75],sb:[65,90]}},
+  {d:'Moisture barrier — install',u:'sqft',sq:true,r:{sal:[0.5,0.85],sb:[0.6,1]}},
+  {d:'Underlayment — install',u:'sqft',sq:true,r:{sal:[0.5,0.85],sb:[0.6,1]}},
+  {d:'Baseboard install',u:'lnft',r:{sal:[4,5],sb:[4.5,6]}},
+  {d:'Remove old baseboard',u:'lnft',r:{sal:[1.25,1.75],sb:[1.5,2]}},
+  {d:'Quarter round / shoe',u:'lnft',r:{sal:[2,3],sb:[2.5,3.5]}},
+  {d:'Transitions / reducers — install',u:'each',r:{sal:[20,35],sb:[25,40]}},
+  {d:'Stair treads — install',u:'each',r:{sal:[50,85],sb:[60,100]}},
+  {d:'Furniture moving',u:'flat',r:{sal:[100,300],sb:[150,350]},basis:'service fee'},
+  {d:'Trash haul-away / disposal',u:'flat',r:{sal:[150,450],sb:[200,500]},basis:'service fee, including disposal'},
+  {d:'Toilet R&R',u:'each',r:{sal:[75,125],sb:[90,150]},basis:'service fee'}
+];
+
+/* Demolition catalog — one chip, many surfaces. */
+const DEMO=[
+  {d:'Ceramic / porcelain tile (thinset on slab)',r:{sal:[3.5,5],sb:[4,6]}},
+  {d:'Tile on mud bed / dust-free removal',r:{sal:[5,7],sb:[6,8]}},
+  {d:'Carpet & pad',r:{sal:[0.75,1.5],sb:[1,1.75]}},
+  {d:'Sheet vinyl / linoleum',r:{sal:[1,2],sb:[1.25,2.25]}},
+  {d:'Glue-down LVP / VCT',r:{sal:[1.5,2.5],sb:[1.75,3]}},
+  {d:'Floating laminate / LVP',r:{sal:[0.6,1.25],sb:[0.75,1.5]}},
+  {d:'Nail-down hardwood',r:{sal:[2,3.5],sb:[2.5,4]}},
+  {d:'Glue-down hardwood',r:{sal:[3.5,5],sb:[4,6]}},
+  {d:'Thinset grinding only',r:{sal:[1.25,2],sb:[1.5,2.5]}},
+  {d:'Custom / other'}
+];
+function openDemo(){
+  $('demoList').innerHTML=DEMO.map((o,i)=>{
+    return `<div class="saved" style="cursor:pointer" onclick="addDemoItem(${i})">
+      <div class="info"><div style="font-weight:600">${o.d}</div></div><span style="color:var(--muted);font-size:12px;text-align:right">${o.r&&MKTS[settings.mkt]?rangeText(o.r,'sqft','labor + haul-away'):'enter your rate'}</span></div>`;
+  }).join('');
+  $('mDemo').classList.add('open');
+}
+function addDemoItem(i){
+  const o=DEMO[i];
+  const key='demo:'+o.d;
+  const it={desc:'Demo — '+o.d+' & haul away',unit:'sqft',qty:totalSqft(),rate:sessionRates[key]||'',key};
+  const h=rangeText(o.r,'sqft','labor + haul-away'); if(h) it.hint=h;
+  items.push(it); renderItems(); calc(); closeModal('mDemo');
+}
+
+/* Reference-range markets (opt-in hints only; never fill the rate) */
+const MKTS={sal:'Salinas / Monterey County',sb:'Morgan Hill / South Bay'};
+const UNITLBL={sqft:'/sq ft',lnft:'/ln ft',hr:'/hr',each:' each',flat:' flat'};
+function rangeText(r,unit,basis='labor'){
+  const m=settings.mkt; if(!r||!MKTS[m]) return '';
+  const [lo,hi]=r[m], fm=v=>'$'+((unit==='sqft'||unit==='lnft')?v.toFixed(2):v);
+  return `Reference — ${MKTS[m]} · ${basis}: ${fm(lo)}–${fm(hi)}${UNITLBL[unit]||''} · not a quote`;
+}
+/* Rates typed this session are reused when the same quick-add item is added again */
+const sessionRates={};
+
+/* ============ HELPERS ============ */
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(isFinite(n)?n:0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=v=>Math.max(0,parseFloat(v)||0);
+const percent=v=>Math.min(100,num(v));
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+function today(){
+  const d=new Date();
+  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+}
+/* Document numbers: E261002-01 = estimate, Oct 2 2026, estimate #01 for this
+   customer. The date part follows the Date field; the -01 part is set by the
+   contractor (nothing is stored, so the app can't count a customer's estimates).
+   Invoices reuse the same number with an I so they trace back to the estimate. */
+function docPrefix(p){
+  return p+($('estDate').value||today()).replace(/-/g,'').slice(2);
+}
+function docNum(p){ return docPrefix(p)+'-'+estSeq; }
+function setEstSeq(el){
+  const v=el.value.replace(/\D/g,'').slice(0,3);
+  if(v!==el.value) el.value=v;
+  estSeq=v?v.padStart(2,'0'):'01';
+}
+/* Free beta: printed and copied documents carry a small "Made with Stimato" credit.
+   A future paid plan can return true here to remove it. */
+function isPro(){return false}
+
+/* ============ DOC TYPE (ESTIMATE <-> INVOICE) ============ */
+function updateDocUI(){
+  const inv = docType==='invoice';
+  $('docLabel').textContent = inv?'Invoice':'Estimate';
+  $('estNum').textContent = docPrefix(inv?'I':'E');
+  if(document.activeElement!==$('estSeq')) $('estSeq').value = estSeq;
+  document.querySelectorAll('.est-only').forEach(el=>el.style.display=inv?'none':'');
+  document.querySelectorAll('.inv-only').forEach(el=>el.style.display=inv?'':'none');
+  $('convertBtn').textContent = inv?'⇄ Back to Estimate':'⇄ Convert to Invoice';
+  $('emailBtn').textContent = inv?'✉ Email Invoice':'✉ Email Estimate';
+}
+function toggleDocType(){
+  if(docType==='estimate'){
+    docType='invoice';
+    renderPayments();
+    toast('Now invoice '+docNum('I'));
+  }else{
+    docType='estimate';
+    toast('Back to estimate '+docNum('E'));
+  }
+  updateDocUI(); calc(); saveEstimate(false);
+}
+/* ============ PAYMENTS ============ */
+function addPayment(){
+  payments.push({date:today(),method:'Cash',amount:''});
+  renderPayments(); calc();
+}
+function renderPayments(){
+  const wrap=$('payments'); if(!wrap) return;
+  wrap.innerHTML = payments.length? payments.map((p,i)=>`
+    <div class="item">
+      <div class="row2" style="grid-template-columns:1.2fr 1fr 1fr auto">
+        <div><label>Date</label><input type="date" value="${p.date}" oninput="payments[${i}].date=this.value"></div>
+        <div><label>Method</label>
+          <select onchange="payments[${i}].method=this.value">
+            ${PAY_METHODS.map(m=>`<option ${p.method===m?'selected':''}>${m}</option>`).join('')}
+          </select></div>
+        <div><label>Amount $</label><input type="number" min="0" inputmode="decimal" step="0.01" value="${p.amount}" oninput="payments[${i}].amount=this.value;calc()"></div>
+        <button class="del" style="align-self:end" onclick="payments.splice(${i},1);renderPayments();calc()">✕</button>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">No payments recorded yet. Add the deposit when it comes in.</div>';
+}
+function paidTotal(){return payments.reduce((s,p)=>s+num(p.amount),0)}
+
+/* ============ ROOMS ============ */
+function addRoom(data){
+  rooms.push(data||{name:'',l:'',w:'',waste:settings.waste});
+  renderRooms();
+}
+function addArea(){
+  rooms.push({name:'Whole house',mode:'area',sq:'',waste:settings.waste});
+  renderRooms();
+}
+function roomBillable(r){
+  const raw = r.mode==='area' ? num(r.sq) : num(r.l)*num(r.w);
+  return raw*(1+wastePct(r)/100);
+}
+let addWaste=true;
+function wasteOn(){return addWaste}
+function wastePct(r){return addWaste?percent(r.waste):0}
+function toggleWaste(on){addWaste=on;$('wasteSw').checked=on;$('wasteSub').textContent=on?'Each room uses its waste %':'Exact measured sq ft, no waste';renderRooms();calc()}
+function roomSqft(r){
+  const billable=roomBillable(r);
+  return billable?Math.ceil(billable):0;
+}
+function renderRooms(){
+  const wrap=$('rooms'); wrap.innerHTML='';
+  rooms.forEach((r,i)=>{
+    const sqft=roomSqft(r);
+    const div=document.createElement('div'); div.className='room';
+    const dimsHtml = r.mode==='area' ? `
+      <div class="dims" style="grid-template-columns:1.4fr 1fr 1fr">
+        <div><label>Total sq ft</label><input type="number" min="0" inputmode="decimal" value="${r.sq==null?'':r.sq}" oninput="rooms[${i}].sq=this.value;updateRoomSq(${i});calc()"></div>
+        <div><label>Waste %</label><input type="number" min="0" max="100" inputmode="decimal" value="${r.waste}" ${wasteOn()?'':'disabled'} oninput="rooms[${i}].waste=this.value;updateRoomSq(${i});calc()"></div>
+        <div class="sqf" id="rsq${i}"><small>${wasteOn()?'w/ waste':'no waste'}</small>${sqft}</div>
+      </div>` : `
+      <div class="dims">
+        <div><label>Length ft</label><input type="number" min="0" inputmode="decimal" value="${r.l}" oninput="rooms[${i}].l=this.value;updateRoomSq(${i});calc()"></div>
+        <div><label>Width ft</label><input type="number" min="0" inputmode="decimal" value="${r.w}" oninput="rooms[${i}].w=this.value;updateRoomSq(${i});calc()"></div>
+        <div><label>Waste %</label><input type="number" min="0" max="100" inputmode="decimal" value="${r.waste}" ${wasteOn()?'':'disabled'} oninput="rooms[${i}].waste=this.value;updateRoomSq(${i});calc()"></div>
+        <div class="sqf" id="rsq${i}"><small>${wasteOn()?'w/ waste':'no waste'}</small>${sqft}</div>
+      </div>`;
+    div.innerHTML=`
+      <div class="top">
+        <input placeholder="${r.mode==='area'?'Area name (Whole house, Upstairs…)':'Room name (Living room, Kitchen…)'}" value="${esc(r.name)}"
+          oninput="rooms[${i}].name=this.value">
+        <button class="del" onclick="rooms.splice(${i},1);renderRooms();calc()">✕</button>
+      </div>`+dimsHtml;
+    wrap.appendChild(div);
+  });
+  updateTape();
+}
+function updateRoomSq(i){
+  const sqft=roomSqft(rooms[i]);
+  const el=$('rsq'+i); if(el) el.innerHTML='<small>'+(wasteOn()?'w/ waste':'no waste')+'</small>'+sqft;
+}
+function totalSqft(){return rooms.reduce((s,r)=>s+roomSqft(r),0)}
+
+/* ============ ITEMS ============ */
+function addItem(data){
+  items.push(data||{desc:'',qty:'',unit:'sqft',rate:''});
+  renderItems();
+}
+/* Blank line item for anything not in the quick-add list; focus its description. */
+function addCustomItem(){
+  addItem();
+  const last=$('items').querySelector('.item:last-child input');
+  if(last){ last.scrollIntoView({block:'center',behavior:'smooth'}); last.focus(); }
+}
+function quickAdd(qi){
+  const q=QUICK[qi];
+  const it={desc:q.d,unit:q.u,rate:sessionRates[q.d]||'',qty:q.sq?totalSqft():'',key:q.d};
+  const h=rangeText(q.r,q.u,q.basis); if(h) it.hint=h;
+  items.push(it); renderItems(); calc();
+}
+function moveItem(i,dir){
+  const j=i+dir;
+  if(j<0||j>=items.length)return;
+  [items[i],items[j]]=[items[j],items[i]];
+  renderItems(); calc();
+}
+function renderItems(){
+  const wrap=$('items'); wrap.innerHTML='';
+  items.forEach((it,i)=>{
+    const amt = it.unit==='flat' ? num(it.rate) : num(it.qty)*num(it.rate);
+    const div=document.createElement('div'); div.className='item';
+    div.innerHTML=`
+      <div class="row1">
+        <input placeholder="Description" value="${esc(it.desc)}" oninput="items[${i}].desc=this.value">
+        <div class="itemActions">
+          <button class="movebtn" title="Move item up" aria-label="Move item up" ${i===0?'disabled':''} onclick="moveItem(${i},-1)">↑</button>
+          <button class="movebtn" title="Move item down" aria-label="Move item down" ${i===items.length-1?'disabled':''} onclick="moveItem(${i},1)">↓</button>
+          <button class="del" title="Delete item" aria-label="Delete item" onclick="items.splice(${i},1);renderItems();calc()">✕</button>
+        </div>
+      </div>
+      <div class="row2">
+        <div><label>Qty</label><input type="number" min="0" inputmode="decimal" value="${it.qty}" ${it.unit==='flat'?'disabled':''} oninput="items[${i}].qty=this.value;calc();refreshAmt(${i},this)"></div>
+        <div><label>Unit</label>
+          <select onchange="items[${i}].unit=this.value;renderItems();calc()">
+            <option value="sqft" ${it.unit==='sqft'?'selected':''}>sq ft</option>
+            <option value="lnft" ${it.unit==='lnft'?'selected':''}>ln ft</option>
+            <option value="hr" ${it.unit==='hr'?'selected':''}>hour</option>
+            <option value="each" ${it.unit==='each'?'selected':''}>each</option>
+            <option value="flat" ${it.unit==='flat'?'selected':''}>flat</option>
+          </select></div>
+        <div><label>Rate $</label><input type="number" min="0" inputmode="decimal" step="0.01" value="${it.rate}" oninput="items[${i}].rate=this.value;if(items[${i}].key)sessionRates[items[${i}].key]=this.value;calc();refreshAmt(${i})"></div>
+        <div class="amt" id="amt${i}">${money(amt)}</div>
+      </div>
+      ${it.hint?`<div class="hint">${esc(it.hint)}</div>`:''}
+      ${it.unit==='sqft'?`<button class="sync" onclick="items[${i}].qty=totalSqft();renderItems();calc()">↺ Sync qty to total sq ft (${totalSqft()})</button>`:''}`;
+    wrap.appendChild(div);
+  });
+  updateTape();
+}
+function refreshAmt(i){
+  const it=items[i];
+  const amt = it.unit==='flat' ? num(it.rate) : num(it.qty)*num(it.rate);
+  const el=$('amt'+i); if(el) el.textContent=money(amt);
+}
+/* Quick-add chips are grouped so materials, flooring installs, and extras
+   don't run together. The section title carries the "Material"/"install"
+   wording, so chip labels drop it; the line item keeps the full name. */
+const INSTALL_RE=/^(LVP|Laminate|Tile|Hardwood|Carpet tile|Carpet|Sheet vinyl|VCT) install\b/;
+const CHIP_GROUPS=[
+  {t:'Materials',has:q=>q.d.startsWith('Material — '),label:q=>q.d.slice('Material — '.length)},
+  {t:'Install',has:q=>INSTALL_RE.test(q.d),label:q=>q.d.replace(' install','')},
+  {t:'Prep, trim & extras',has:q=>!q.d.startsWith('Material — ')&&!INSTALL_RE.test(q.d),label:q=>q.d}
+];
+function renderChips(){
+  $('quickChips').innerHTML =
+    CHIP_GROUPS.map(g=>`<div class="qgroup">${g.t}</div>`+
+      QUICK.map((q,i)=>{
+        if(!g.has(q)) return '';
+        if(q.demo) return `<button class="chip" title="Pick what you're tearing out" onclick="openDemo()" style="border-color:var(--accent)">+ ${g.label(q)}</button>`;
+        const tip=rangeText(q.r,q.u,q.basis)||'Add this item, then enter your rate';
+        return `<button class="chip" title="${esc(tip)}" onclick="quickAdd(${i})">+ ${esc(g.label(q))}</button>`;
+      }).join('')
+    ).join('')+
+    `<div class="qsep"></div><button class="chip chip-other" title="Add a blank line for anything not listed" onclick="addCustomItem()">+ Something else…</button>`;
+}
+function renderMktRow(){
+  $('mktRow').innerHTML=`
+    <div class="mktrow">
+      <label for="mktSel">Reference ranges</label>
+      <select id="mktSel" onchange="setMkt(this.value)">
+        <option value="" ${!settings.mkt?'selected':''}>Off</option>
+        ${Object.entries(MKTS).map(([k,v])=>`<option value="${k}" ${settings.mkt===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <div class="hint">Optional provisional references, last reviewed September 2026. They never fill your rate and are not market quotes.</div>
+    </div>`;
+}
+function setMkt(v){
+  settings.mkt=MKTS[v]?v:'';
+  items.forEach(it=>{
+    if(!it.key) return;
+    const d=it.key.startsWith('demo:')?DEMO.find(o=>'demo:'+o.d===it.key):QUICK.find(q=>q.d===it.key);
+    const h=d&&rangeText(d.r,it.unit,d.basis); if(h) it.hint=h; else delete it.hint;
+  });
+  renderChips(); renderItems();
+}
+
+/* ============ CALC ============ */
+function calc(){
+  const sub = items.reduce((s,it)=> s + (it.unit==='flat'?num(it.rate):num(it.qty)*num(it.rate)),0);
+  const disc=Math.min(num($('tDisc').value),sub);
+  const taxable=Math.max(sub-disc,0);
+  const tax=taxable*percent($('tTax').value)/100;
+  const total=taxable+tax;
+  const dep=total*percent($('tDep').value)/100;
+  const paid=paidTotal(), due=total-paid;
+  $('tSub').textContent=money(sub);
+  $('tTaxAmt').textContent=money(tax);
+  $('tTotal').textContent=money(total);
+  $('tDepAmt').textContent=money(dep);
+  $('tBal').textContent=money(total-dep);
+  $('tPaid').textContent=money(paid);
+  $('tDue').textContent=money(due);
+  tapeTotal=total;
+  updateTape();
+  return {sub,disc,tax,total,dep,bal:total-dep,paid,due};
+}
+let tapeTotal=0;
+function updateTape(){
+  const sq=totalSqft();
+  $('tapeSq').textContent=sq.toLocaleString();
+  $('tapeItems').textContent=items.length;
+  /* Whole dollars fit the narrow bar; round rather than drop the cents. */
+  $('tapeTot').textContent='$'+Math.round(tapeTotal).toLocaleString('en-US');
+  document.querySelectorAll('.sync').forEach(b=>b.textContent=`↺ Sync qty to total sq ft (${sq})`);
+}
+
+/* ============ SESSION-ONLY DRAFT ============ */
+function snapshot(){
+  return {
+    id:curId||Date.now(), num:docNum('E'), seq:estSeq, docType, invNum:docNum('I'), date:$('estDate').value, valid:$('validDays').value,
+    client:{name:$('cName').value,phone:$('cPhone').value,email:$('cEmail').value,addr:$('cAddr').value},
+    rooms:JSON.parse(JSON.stringify(rooms)), addWaste, items:JSON.parse(JSON.stringify(items)),
+    payments:JSON.parse(JSON.stringify(payments)),
+    disc:$('tDisc').value, tax:$('tTax').value, dep:$('tDep').value, notes:$('notes').value,
+    total:calc().total, saved:new Date().toISOString()
+  };
+}
+function saveEstimate(show){
+  if(show) openNoSave();
+  return snapshot();
+}
+function loadEstimate(snap){
+  curId=snap.id;
+  estSeq=snap.seq||((/-(\d+)$/.exec(snap.num||'')||[])[1])||'01'; docType=snap.docType||'estimate'; payments=snap.payments||[];
+  $('estDate').value=snap.date; $('validDays').value=snap.valid||30;
+  $('cName').value=snap.client.name||''; $('cPhone').value=snap.client.phone||'';
+  $('cEmail').value=snap.client.email||''; $('cAddr').value=snap.client.addr||'';
+  rooms=snap.rooms||[]; items=snap.items||[];
+  addWaste=snap.addWaste!==false; $('wasteSw').checked=addWaste; $('wasteSub').textContent=addWaste?'Each room uses its waste %':'Exact measured sq ft, no waste';
+  $('tDisc').value=snap.disc||0; $('tTax').value=snap.tax||0; $('tDep').value=snap.dep||settings.dep;
+  $('notes').value=snap.notes||settings.terms;
+  renderRooms(); renderItems(); renderPayments(); updateDocUI(); calc();
+}
+/* Anything typed that "New" would throw away (nothing is saved in the beta). */
+function hasEstimateData(){
+  return items.length>0
+    || rooms.some(r=>r.name||num(r.l)||num(r.w)||num(r.sq))
+    || ['cName','cPhone','cEmail','cAddr'].some(id=>$(id).value.trim());
+}
+function newEstimate(){
+  if(hasEstimateData() && !confirm('Start a new estimate?\n\nThis one is not saved. Use PDF / Print or Copy Text first if you want to keep it.')) return;
+  curId=null;
+  estSeq='01'; docType='estimate'; payments=[];
+  $('estDate').value=today(); $('validDays').value=30;
+  ['cName','cPhone','cEmail','cAddr'].forEach(id=>$(id).value='');
+  rooms=[]; items=[];
+  addWaste=true; $('wasteSw').checked=true; $('wasteSub').textContent='Each room uses its waste %';
+  $('tDisc').value=0; $('tTax').value=settings.tax||0; $('tDep').value=settings.dep||50;
+  $('notes').value=settings.terms;
+  addRoom(); renderItems(); renderPayments(); updateDocUI(); calc();
+  toast('New estimate '+docNum('E'));
+}
+function openSaved(){
+  openNoSave();
+}
+function delEstimate(id){
+  openNoSave();
+}
+
+/* ============ SETTINGS ============ */
+let logoDraft='';
+function openSettings(){
+  $('sCo').value=settings.co; $('sPhone').value=settings.phone; $('sEmail').value=settings.email;
+  $('sLic').value=settings.lic; $('sTax').value=settings.tax; $('sWaste').value=settings.waste;
+  $('sDep').value=settings.dep; $('sTerms').value=settings.terms;
+  logoDraft=settings.logo||''; $('sLogo').value=''; updateLogoPrev();
+  $('mSettings').classList.add('open');
+}
+function logoPicked(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      /* Downscale the temporary document logo for a compact printed estimate. */
+      const max=280, sc=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc));
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      logoDraft=c.toDataURL('image/png');
+      updateLogoPrev();
+    };
+    img.src=e.target.result;
+  };
+  rd.readAsDataURL(f);
+}
+function removeLogo(){logoDraft=''; $('sLogo').value=''; updateLogoPrev();}
+function updateLogoPrev(){
+  const p=$('sLogoPrev'), d=$('sLogoDel');
+  p.style.display=logoDraft?'block':'none'; if(logoDraft) p.src=logoDraft;
+  d.style.display=logoDraft?'':'none';
+}
+function saveSettings(){
+  settings=Object.assign({},settings,{co:$('sCo').value,phone:$('sPhone').value,email:$('sEmail').value,lic:$('sLic').value,
+    tax:percent($('sTax').value),waste:percent($('sWaste').value),dep:percent($('sDep').value),terms:$('sTerms').value,
+    logo:logoDraft});
+  renderMktRow(); renderChips();
+  closeModal('mSettings'); toast('Company details applied; defaults apply to your next estimate');
+}
+function closeModal(id){$(id).classList.remove('open')}
+let installPrompt=null;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
+window.addEventListener('appinstalled',()=>{installPrompt=null;closeModal('mInstall');toast('Stimato was added to your device')});
+function openInstall(){
+  const action=$('installAction'); action.style.display='none';
+  if(isStandalone()){
+    $('installLead').textContent='Stimato is already installed on this device.';
+    $('installDetail').textContent='Open it from your home screen or app list whenever you need a quick estimate.';
+  }else if(installPrompt){
+    $('installLead').textContent='Add Stimato to your device for a full-screen, app-like experience.';
+    $('installDetail').textContent='It is still free and does not save estimates in this beta.';
+    action.style.display='';
+  }else if(isIOS()){
+    $('installLead').textContent='Add Stimato to your iPhone or iPad home screen.';
+    $('installDetail').textContent='In Safari, tap Share, scroll down, choose Add to Home Screen, then tap Add. Open it from the new Stimato icon.';
+  }else{
+    $('installLead').textContent='Add Stimato to your device for a full-screen, app-like experience.';
+    $('installDetail').textContent='Open your browser menu and choose Install app or Add to Home screen. The exact wording depends on your browser.';
+  }
+  $('mInstall').classList.add('open');
+}
+async function triggerInstall(){
+  if(!installPrompt){openInstall();return}
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt=null;
+  closeModal('mInstall');
+}
+function openNoSave(){
+  $('noSaveLead').textContent='Stimato lets you build an estimate without an account. This beta does not save your estimate or invoice history.';
+  $('noSaveDetail').innerHTML='Before leaving, use <b style="color:var(--text)">PDF / Print</b> to download a copy or <b style="color:var(--text)">Copy Text</b> to send it. Saved estimates and invoice conversion will be available with free accounts in a future release.';
+  $('mNoSave').classList.add('open');
+}
+function openAccountRequired(){
+  $('noSaveLead').textContent='Create a free account to convert this estimate into an invoice.';
+  $('noSaveDetail').textContent='Free accounts will save your estimate history and let you create invoices from the same job details. This feature is coming soon.';
+  $('mNoSave').classList.add('open');
+}
+
+/* ============ TEXT / EMAIL / PRINT ============ */
+function estimateText(){
+  const t=calc(), inv=docType==='invoice';
+  let out=`${settings.co||(inv?'INVOICE':'ESTIMATE')}\n`;
+  if(settings.phone) out+=`${settings.phone}`;
+  if(settings.email) out+=`  ·  ${settings.email}`;
+  out+=`\n${settings.lic?('Lic #'+settings.lic+'\n'):''}`;
+  out+=`\n${inv?'INVOICE '+docNum('I'):docNum('E')}  ·  ${$('estDate').value}${inv?'  ·  Due on receipt':'  ·  Valid '+$('validDays').value+' days'}\n`;
+  out+=`\nCLIENT: ${$('cName').value}\n${$('cAddr').value}\n`;
+  if(rooms.length){
+    out+=`\nAREAS:\n`;
+    rooms.forEach(r=>{
+      const sq=roomSqft(r);
+      const dims=r.mode==='area'?`${r.sq} sq ft`:`${r.l}x${r.w} ft`;
+      out+=`  ${r.name||'Room'}: ${dims} (${wasteOn()?'+'+r.waste+'% waste':'no waste'}) = ${sq} sq ft\n`;
+    });
+    out+=`  TOTAL: ${totalSqft()} sq ft\n`;
+  }
+  out+=`\nWORK & MATERIALS:\n`;
+  items.forEach(it=>{
+    const amt=it.unit==='flat'?num(it.rate):num(it.qty)*num(it.rate);
+    const q=it.unit==='flat'?'':` — ${it.qty} ${it.unit==='sqft'?'sq ft':it.unit==='lnft'?'ln ft':it.unit==='hr'?'hrs':'x'} @ ${money(num(it.rate))}`;
+    out+=`  ${it.desc}${q} = ${money(amt)}\n`;
+  });
+  out+=`\nSubtotal: ${money(t.sub)}\n`;
+  if(t.disc>0) out+=`Discount: -${money(t.disc)}\n`;
+  if(t.tax>0) out+=`Tax: ${money(t.tax)}\n`;
+  out+=`TOTAL: ${money(t.total)}\n`;
+  if(inv){
+    if(payments.length){
+      out+=`\nPAYMENTS RECEIVED:\n`;
+      payments.forEach(p=>{ if(num(p.amount)>0) out+=`  ${p.date} — ${p.method}: ${money(num(p.amount))}\n`; });
+      out+=`Paid to date: ${money(t.paid)}\n`;
+    }
+    out+=`\n*** BALANCE DUE: ${money(t.due)} ***\n`;
+  }else{
+    out+=`Deposit to schedule: ${money(t.dep)}\nBalance on completion: ${money(t.bal)}\n`;
+  }
+  out+=`\n${$('notes').value}\n`;
+  if(!isPro()) out+=`\n— Made with Stimato · stimato.app\n`;
+  return out;
+}
+function emailEstimate(){
+  saveEstimate(false);
+  const to=encodeURIComponent($('cEmail').value||'');
+  const subj=encodeURIComponent(`${settings.co||'Flooring'} ${docType==='invoice'?'Invoice '+docNum('I'):'Estimate '+docNum('E')} — ${$('cName').value}`);
+  const body=encodeURIComponent(estimateText());
+  window.location.href=`mailto:${to}?subject=${subj}&body=${body}`;
+}
+function copyText(){
+  navigator.clipboard.writeText(estimateText()).then(()=>toast('Copied — paste into text/WhatsApp'))
+    .catch(()=>{ prompt('Copy the estimate text:', estimateText()); });
+}
+function printEstimate(){
+  saveEstimate(false);
+  const t=calc();
+  const roomsRows=rooms.map(r=>{
+    const sq=roomSqft(r);
+    const dims=r.mode==='area'?`${r.sq} sq ft (as measured)`:`${r.l} × ${r.w} ft`;
+    return `<tr><td>${esc(r.name)||'Room'}</td><td class="r">${dims}</td><td class="r">${wasteOn()?r.waste+'%':'—'}</td><td class="r">${sq} sq ft</td></tr>`;
+  }).join('');
+  const itemRows=items.map(it=>{
+    const amt=it.unit==='flat'?num(it.rate):num(it.qty)*num(it.rate);
+    const u=it.unit==='sqft'?'sq ft':it.unit==='lnft'?'ln ft':it.unit==='hr'?'hrs':it.unit;
+    return `<tr><td>${esc(it.desc)}</td><td class="r">${it.unit==='flat'?'—':it.qty+' '+u}</td><td class="r">${it.unit==='flat'?'—':money(num(it.rate))}</td><td class="r">${money(amt)}</td></tr>`;
+  }).join('');
+  $('printDoc').innerHTML=`
+    <div class="p-head">
+      <div class="p-co">${settings.logo?`<img src="${settings.logo}" alt="" style="height:52px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px">`:''}${esc(settings.co)||'Estimate'}
+        <small>${esc(settings.phone)}${settings.email?' · '+esc(settings.email):''}${settings.lic?' · Lic #'+esc(settings.lic):''}</small>
+      </div>
+      <div class="p-est">
+        <div class="t">${docType==='invoice'?'Invoice':'Estimate'}</div>
+        <div><b>${docNum(docType==='invoice'?'I':'E')}</b></div>
+        <div>${$('estDate').value} · ${docType==='invoice'?'due on receipt':'valid '+$('validDays').value+' days'}</div>
+      </div>
+    </div>
+    <div class="p-cols">
+      <div><h4>${docType==='invoice'?'Bill to':'Prepared for'}</h4><b>${esc($('cName').value)}</b><br>${esc($('cPhone').value)}<br>${esc($('cEmail').value)}</div>
+      <div><h4>Job address</h4>${esc($('cAddr').value)}</div>
+    </div>
+    ${rooms.length?`<table class="p-tbl"><tr><th>Area</th><th class="r">Dimensions</th><th class="r">Waste</th><th class="r">Sq Ft</th></tr>${roomsRows}
+      <tr><td colspan="3" style="border:none"></td><td class="r"><b>${totalSqft()} sq ft total</b></td></tr></table>`:''}
+    <table class="p-tbl"><tr><th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr>${itemRows}</table>
+    <div class="p-tots">
+      <div><span>Subtotal</span><span>${money(t.sub)}</span></div>
+      ${t.disc>0?`<div><span>Discount</span><span>-${money(t.disc)}</span></div>`:''}
+      ${t.tax>0?`<div><span>Tax</span><span>${money(t.tax)}</span></div>`:''}
+      <div class="grand"><span>Total</span><span>${money(t.total)}</span></div>
+      ${docType==='invoice'
+        ? payments.filter(p=>num(p.amount)>0).map(p=>`<div><span>Paid ${p.date} (${esc(p.method)})</span><span>-${money(num(p.amount))}</span></div>`).join('')
+          + `<div class="grand"><span>Balance due</span><span>${money(t.due)}</span></div>`
+        : `<div><span>Deposit to schedule</span><span>${money(t.dep)}</span></div>
+           <div><span>Balance on completion</span><span>${money(t.bal)}</span></div>`}
+    </div>
+    <div class="p-notes">${esc($('notes').value)}</div>
+    <div class="p-sign"><div>Customer signature / date</div><div>${esc(settings.co)||'Contractor'} / date</div></div>
+    ${isPro()?'':'<div style="margin-top:20px;font-size:10px;color:#999;text-align:center">Made with Stimato · <a href="https://stimato.app" style="color:#999;text-decoration:none">stimato.app</a></div>'}`;
+  window.print();
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ============ INIT ============ */
+renderMktRow();
+renderChips();
+$('estDate').value=today();
+$('tTax').value=settings.tax||0; $('tDep').value=settings.dep||50; $('notes').value=settings.terms;
+addRoom(); renderItems(); renderPayments(); updateDocUI();
+calc();
+
+/* Cache only the app shell for offline opening. Estimate data remains in-memory. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>

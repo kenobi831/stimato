@@ -1,0 +1,19 @@
+{
+  "name": "Stimato — Flooring Estimates",
+  "short_name": "Stimato",
+  "description": "A free, no-save flooring estimate calculator for the jobsite.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101317",
+  "theme_color": "#101317",
+  "icons": [
+    {
+      "src": "/icons/stimato.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
