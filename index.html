@@ -934,7 +934,18 @@ function openNoSave(){
   $('noSaveDetail').innerHTML='Before leaving, use <b style="color:var(--text)">PDF / Print</b> to download a copy or <b style="color:var(--text)">Copy Text</b> to send it. Saved estimates and invoice conversion will be available with free accounts in a future release.';
   $('mNoSave').classList.add('open');
 }
+/* Owner back door: open stimato.app/?owner=831 once on a device to unlock
+   invoice conversion there (stored in localStorage). ?owner=off removes it. */
+function ownerMode(){
+  try{
+    const q=new URLSearchParams(location.search).get('owner');
+    if(q==='831') localStorage.setItem('stimatoOwner','1');
+    if(q==='off') localStorage.removeItem('stimatoOwner');
+    return localStorage.getItem('stimatoOwner')==='1';
+  }catch(e){return false}
+}
 function openAccountRequired(){
+  if(ownerMode()) return toggleDocType();
   $('noSaveLead').textContent='Create a free account to convert this estimate into an invoice.';
   $('noSaveDetail').textContent='Free accounts will save your estimate history and let you create invoices from the same job details. This feature is coming soon.';
   $('mNoSave').classList.add('open');
