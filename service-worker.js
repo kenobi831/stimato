@@ -1,4 +1,4 @@
-const CACHE_NAME='stimato-shell-v4';
+const CACHE_NAME='stimato-shell-v5';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/icons/stimato.svg','/icons/apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{

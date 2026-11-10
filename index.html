@@ -249,7 +249,7 @@
   <div class="brand"><span class="logo" aria-hidden="true"><b>S</b></span><div class="wordmark">Stima<span>to</span></div></div>
   <div class="hbtns">
     <button class="icobtn" onclick="openInstall()">Get app</button>
-    <button class="icobtn" onclick="openNoSave()">How it works</button>
+    <button class="icobtn" onclick="openSaved()">Saved</button>
     <button class="icobtn" onclick="openSettings()">⚙</button>
   </div>
 </header>
@@ -331,7 +331,7 @@
 
   <!-- ACTIONS -->
   <div class="actions">
-    <button class="btn primary" onclick="openNoSave()">Save online</button>
+    <button class="btn primary" onclick="saveEstimate(true)">💾 Save</button>
     <button class="btn ghost" onclick="newEstimate()">New</button>
     <button class="btn ghost" onclick="printEstimate()">PDF / Print</button>
     <button class="btn ghost" onclick="copyText()">Copy Text</button>
@@ -339,7 +339,7 @@
     <button class="btn primary wide" id="emailBtn" onclick="emailEstimate()">✉ Email Estimate</button>
   </div>
   <div class="finefoot">
-    Set your own pricing and verify all taxes, scope, and contract requirements. This beta does not save estimates; print to PDF or copy the text before leaving.
+    Set your own pricing and verify all taxes, scope, and contract requirements. Saved jobs stay on this device only; use PDF / Print or Copy Text to keep a copy elsewhere.
     <a href="mailto:feedback@stimato.app?subject=Stimato%20beta%20feedback">Send feedback</a>
   </div>
  </div>
@@ -435,13 +435,12 @@
 <div class="toast" id="toast"></div>
 <div id="printDoc"></div>
 
-<!-- ACCOUNT / SAVING NOTICE -->
-<div class="modal" id="mNoSave">
+<!-- SAVED JOBS (stored on this device) -->
+<div class="modal" id="mSaved">
   <div class="sheet">
-    <h3>Free estimate beta <button onclick="closeModal('mNoSave')">✕</button></h3>
-    <p id="noSaveLead" style="line-height:1.55;color:var(--text);margin-bottom:12px">Stimato lets you build an estimate without an account. This beta does not save your estimate or invoice history.</p>
-    <p id="noSaveDetail" style="line-height:1.55;color:var(--muted);margin-bottom:16px">Before leaving, use <b style="color:var(--text)">PDF / Print</b> to download a copy or <b style="color:var(--text)">Copy Text</b> to send it. Saved estimates will be available with free accounts in a future release.</p>
-    <button class="btn primary wide" style="width:100%" onclick="closeModal('mNoSave')">Keep estimating</button>
+    <h3>Saved jobs <button onclick="closeModal('mSaved')">✕</button></h3>
+    <div style="color:var(--muted);font-size:13px;margin:-6px 0 12px">Saved on this device. Clearing browser data deletes them.</div>
+    <div id="savedList"></div>
   </div>
 </div>
 
@@ -462,8 +461,11 @@ const SET_DEFAULTS = {
   co:'', phone:'', email:'', lic:'', tax:0, waste:8, dep:50, mkt:'', logo:'',
   terms:'• Estimate valid for the period shown above.\n• Deposit required to schedule; amount shown above. Balance due on completion.\n• Price includes labor and materials listed. Subfloor repairs beyond normal prep billed at additional cost after inspection.\n• Furniture and appliance moving not included unless listed.\n• Customer to provide clear access to work areas.'
 };
-/* Public beta: all work exists only for this page session. */
-let settings = Object.assign({}, SET_DEFAULTS);
+/* Jobs and company settings are stored in this device's localStorage. */
+const JOBS_KEY='stimatoJobs', SET_KEY='stimatoSettings', CUR_KEY='stimatoCurrent';
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+let settings = Object.assign({}, SET_DEFAULTS, lsGet(SET_KEY,{}));
 let rooms=[], items=[];
 let curId=null;
 let docType='estimate', estSeq='01', payments=[];
@@ -816,9 +818,18 @@ function snapshot(){
     total:calc().total, saved:new Date().toISOString()
   };
 }
+function getJobs(){return lsGet(JOBS_KEY,[])}
+/* Saves the current job on this device. Silent calls (print, email, convert,
+   leaving the app) only save jobs that have something typed in them. */
 function saveEstimate(show){
-  if(show) openNoSave();
-  return snapshot();
+  const snap=snapshot();
+  if(!show && !curId && !hasEstimateData()) return snap;
+  curId=snap.id;
+  const jobs=getJobs().filter(j=>j.id!==snap.id);
+  jobs.unshift(snap);
+  if(lsSet(JOBS_KEY,jobs)){ lsSet(CUR_KEY,snap.id); if(show) toast('Saved '+(docType==='invoice'?snap.invNum:snap.num)); }
+  else if(show) toast('Could not save — device storage is full');
+  return snap;
 }
 function loadEstimate(snap){
   curId=snap.id;
@@ -832,15 +843,21 @@ function loadEstimate(snap){
   $('notes').value=snap.notes||settings.terms;
   renderRooms(); renderItems(); renderPayments(); updateDocUI(); calc();
 }
-/* Anything typed that "New" would throw away (nothing is saved in the beta). */
+/* Anything typed in the current job. */
 function hasEstimateData(){
   return items.length>0
     || rooms.some(r=>r.name||num(r.l)||num(r.w)||num(r.sq))
     || ['cName','cPhone','cEmail','cAddr'].some(id=>$(id).value.trim());
 }
 function newEstimate(){
-  if(hasEstimateData() && !confirm('Start a new estimate?\n\nThis one is not saved. Use PDF / Print or Copy Text first if you want to keep it.')) return;
+  if(curId||hasEstimateData()) saveEstimate(false);
+  resetEstimate();
+  toast('New estimate '+docNum('E'));
+}
+/* Blank job in the form, without saving the one that was there. */
+function resetEstimate(){
   curId=null;
+  try{localStorage.removeItem(CUR_KEY)}catch(e){}
   estSeq='01'; docType='estimate'; payments=[];
   $('estDate').value=today(); $('validDays').value=30;
   ['cName','cPhone','cEmail','cAddr'].forEach(id=>$(id).value='');
@@ -849,13 +866,32 @@ function newEstimate(){
   $('tDisc').value=0; $('tTax').value=settings.tax||0; $('tDep').value=settings.dep||50;
   $('notes').value=settings.terms;
   addRoom(); renderItems(); renderPayments(); updateDocUI(); calc();
-  toast('New estimate '+docNum('E'));
 }
 function openSaved(){
-  openNoSave();
+  if(curId||hasEstimateData()) saveEstimate(false);
+  const jobs=getJobs();
+  $('savedList').innerHTML = jobs.length ? jobs.map(j=>`
+    <div class="item" style="display:flex;gap:10px;align-items:center${j.id===curId?';border-color:var(--accent)':''}">
+      <div style="flex:1;min-width:0;cursor:pointer" onclick="openJob(${j.id})">
+        <div style="font-weight:700">${esc((j.client&&j.client.name)||'No name')}</div>
+        <div style="color:var(--muted);font-size:12px">${j.docType==='invoice'?'Invoice '+esc(j.invNum):'Estimate '+esc(j.num)} · ${esc(j.date)} · ${money(j.total||0)}</div>
+      </div>
+      <button class="icobtn" onclick="openJob(${j.id})">Open</button>
+      <button class="del" onclick="delEstimate(${j.id})">✕</button>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">No saved jobs yet. Tap 💾 Save on an estimate.</div>';
+  $('mSaved').classList.add('open');
+}
+function openJob(id){
+  const j=getJobs().find(x=>x.id===id); if(!j) return;
+  loadEstimate(j); lsSet(CUR_KEY,id);
+  closeModal('mSaved'); toast('Opened '+(docType==='invoice'?j.invNum:j.num));
 }
 function delEstimate(id){
-  openNoSave();
+  const j=getJobs().find(x=>x.id===id); if(!j) return;
+  if(!confirm('Delete '+(((j.client&&j.client.name))||'this job')+'? This cannot be undone.')) return;
+  lsSet(JOBS_KEY,getJobs().filter(x=>x.id!==id));
+  if(curId===id) resetEstimate();
+  openSaved();
 }
 
 /* ============ SETTINGS ============ */
@@ -895,6 +931,7 @@ function saveSettings(){
   settings=Object.assign({},settings,{co:$('sCo').value,phone:$('sPhone').value,email:$('sEmail').value,lic:$('sLic').value,
     tax:percent($('sTax').value),waste:percent($('sWaste').value),dep:percent($('sDep').value),terms:$('sTerms').value,
     logo:logoDraft});
+  if(!lsSet(SET_KEY,settings)) toast('Logo too large to save on this device');
   renderMktRow(); renderChips();
   closeModal('mSettings'); toast('Company details applied; defaults apply to your next estimate');
 }
@@ -928,11 +965,6 @@ async function triggerInstall(){
   await installPrompt.userChoice;
   installPrompt=null;
   closeModal('mInstall');
-}
-function openNoSave(){
-  $('noSaveLead').textContent='Stimato lets you build an estimate without an account. This beta does not save your estimate or invoice history.';
-  $('noSaveDetail').innerHTML='Before leaving, use <b style="color:var(--text)">PDF / Print</b> to download a copy or <b style="color:var(--text)">Copy Text</b> to send it. Saved estimates will be available with free accounts in a future release.';
-  $('mNoSave').classList.add('open');
 }
 /* ============ TEXT / EMAIL / PRINT ============ */
 function estimateText(){
@@ -1043,8 +1075,11 @@ $('estDate').value=today();
 $('tTax').value=settings.tax||0; $('tDep').value=settings.dep||50; $('notes').value=settings.terms;
 addRoom(); renderItems(); renderPayments(); updateDocUI();
 calc();
+(function(){const id=lsGet(CUR_KEY,null), j=id&&getJobs().find(x=>x.id===id); if(j) loadEstimate(j);})();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveEstimate(false); });
+window.addEventListener('pagehide',()=>saveEstimate(false));
 
-/* Cache only the app shell for offline opening. Estimate data remains in-memory. */
+/* Cache only the app shell for offline opening. Jobs live in localStorage. */
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(()=>{}));
 }
