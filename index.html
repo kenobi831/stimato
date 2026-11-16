@@ -398,7 +398,6 @@
   <div class="sheet">
     <h3>My Company <button onclick="closeModal('mSettings')">✕</button></h3>
     <div class="field"><label>Company name</label><input id="sCo" placeholder="831 Floors"></div>
-    <div class="field"><label>Business address</label><input id="sAddr" placeholder="123 Main St, Salinas CA 93901" autocomplete="street-address"></div>
     <div class="grid2">
       <div class="field"><label>Phone</label><input id="sPhone" inputmode="tel"></div>
       <div class="field"><label>Email (reply-to)</label><input id="sEmail" inputmode="email"></div>
@@ -408,6 +407,7 @@
       <div class="field"><label>License # (optional)</label><input id="sLic"></div>
       <div class="field"><label>Default tax %</label><input id="sTax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></div>
     </div>
+    <div class="field"><label>Business address</label><input id="sAddr" placeholder="123 Main St, Salinas CA 93901" autocomplete="street-address"></div>
     <div class="grid2">
       <div class="field"><label>Default waste %</label><input id="sWaste" type="number" value="8" min="0" max="100" inputmode="decimal"></div>
       <div class="field"><label>Default deposit %</label><input id="sDep" type="number" value="50" min="0" max="100" inputmode="decimal"></div>
@@ -972,11 +972,10 @@ async function triggerInstall(){
 function estimateText(){
   const t=calc(), inv=docType==='invoice';
   let out=`${settings.co||(inv?'INVOICE':'ESTIMATE')}\n`;
-  if(settings.addr) out+=`${settings.addr}\n`;
   if(settings.phone) out+=`${settings.phone}`;
   if(settings.email) out+=`  ·  ${settings.email}`;
   if(settings.web) out+=`${settings.phone||settings.email?'  ·  ':''}${settings.web}`;
-  out+=`\n${settings.lic?('Lic #'+settings.lic+'\n'):''}`;
+  out+=`\n${settings.lic?('Lic #'+settings.lic+'\n'):''}${settings.addr?settings.addr+'\n':''}`;
   out+=`\n${inv?'INVOICE '+docNum('I'):docNum('E')}  ·  ${$('estDate').value}${inv?'  ·  Due on receipt':'  ·  Valid '+$('validDays').value+' days'}\n`;
   out+=`\nCLIENT: ${$('cName').value}\n${$('cAddr').value}\n`;
   if(rooms.length){
@@ -1039,7 +1038,7 @@ function printEstimate(){
   $('printDoc').innerHTML=`
     <div class="p-head">
       <div class="p-co">${settings.logo?`<img src="${settings.logo}" alt="" style="height:52px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px">`:''}${esc(settings.co)||'Estimate'}
-        <small>${settings.addr?esc(settings.addr)+'<br>':''}${[settings.phone,settings.email,settings.web,settings.lic?'Lic #'+settings.lic:''].filter(Boolean).map(esc).join(' · ')}</small>
+        <small>${[settings.phone,settings.email,settings.web,settings.lic?'Lic #'+settings.lic:''].filter(Boolean).map(esc).join(' · ')}${settings.addr?'<br>'+esc(settings.addr):''}</small>
       </div>
       <div class="p-est">
         <div class="t">${docType==='invoice'?'Invoice':'Estimate'}</div>
