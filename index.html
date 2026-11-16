@@ -398,10 +398,12 @@
   <div class="sheet">
     <h3>My Company <button onclick="closeModal('mSettings')">✕</button></h3>
     <div class="field"><label>Company name</label><input id="sCo" placeholder="831 Floors"></div>
+    <div class="field"><label>Business address</label><input id="sAddr" placeholder="123 Main St, Salinas CA 93901" autocomplete="street-address"></div>
     <div class="grid2">
       <div class="field"><label>Phone</label><input id="sPhone" inputmode="tel"></div>
       <div class="field"><label>Email (reply-to)</label><input id="sEmail" inputmode="email"></div>
     </div>
+    <div class="field"><label>Website (optional)</label><input id="sWeb" inputmode="url" placeholder="831floors.com"></div>
     <div class="grid2">
       <div class="field"><label>License # (optional)</label><input id="sLic"></div>
       <div class="field"><label>Default tax %</label><input id="sTax" type="number" min="0" max="100" step="0.01" inputmode="decimal"></div>
@@ -458,7 +460,7 @@
 <script>
 /* ============ STATE ============ */
 const SET_DEFAULTS = {
-  co:'', phone:'', email:'', lic:'', tax:0, waste:8, dep:50, mkt:'', logo:'',
+  co:'', addr:'', web:'', phone:'', email:'', lic:'', tax:0, waste:8, dep:50, mkt:'', logo:'',
   terms:'• Estimate valid for the period shown above.\n• Deposit required to schedule; amount shown above. Balance due on completion.\n• Price includes labor and materials listed. Subfloor repairs beyond normal prep billed at additional cost after inspection.\n• Furniture and appliance moving not included unless listed.\n• Customer to provide clear access to work areas.'
 };
 /* Jobs and company settings are stored in this device's localStorage. */
@@ -897,7 +899,7 @@ function delEstimate(id){
 /* ============ SETTINGS ============ */
 let logoDraft='';
 function openSettings(){
-  $('sCo').value=settings.co; $('sPhone').value=settings.phone; $('sEmail').value=settings.email;
+  $('sCo').value=settings.co; $('sAddr').value=settings.addr||''; $('sWeb').value=settings.web||''; $('sPhone').value=settings.phone; $('sEmail').value=settings.email;
   $('sLic').value=settings.lic; $('sTax').value=settings.tax; $('sWaste').value=settings.waste;
   $('sDep').value=settings.dep; $('sTerms').value=settings.terms;
   logoDraft=settings.logo||''; $('sLogo').value=''; updateLogoPrev();
@@ -928,7 +930,7 @@ function updateLogoPrev(){
   d.style.display=logoDraft?'':'none';
 }
 function saveSettings(){
-  settings=Object.assign({},settings,{co:$('sCo').value,phone:$('sPhone').value,email:$('sEmail').value,lic:$('sLic').value,
+  settings=Object.assign({},settings,{co:$('sCo').value,addr:$('sAddr').value.trim(),web:$('sWeb').value.trim(),phone:$('sPhone').value,email:$('sEmail').value,lic:$('sLic').value,
     tax:percent($('sTax').value),waste:percent($('sWaste').value),dep:percent($('sDep').value),terms:$('sTerms').value,
     logo:logoDraft});
   if(!lsSet(SET_KEY,settings)) toast('Logo too large to save on this device');
@@ -970,8 +972,10 @@ async function triggerInstall(){
 function estimateText(){
   const t=calc(), inv=docType==='invoice';
   let out=`${settings.co||(inv?'INVOICE':'ESTIMATE')}\n`;
+  if(settings.addr) out+=`${settings.addr}\n`;
   if(settings.phone) out+=`${settings.phone}`;
   if(settings.email) out+=`  ·  ${settings.email}`;
+  if(settings.web) out+=`${settings.phone||settings.email?'  ·  ':''}${settings.web}`;
   out+=`\n${settings.lic?('Lic #'+settings.lic+'\n'):''}`;
   out+=`\n${inv?'INVOICE '+docNum('I'):docNum('E')}  ·  ${$('estDate').value}${inv?'  ·  Due on receipt':'  ·  Valid '+$('validDays').value+' days'}\n`;
   out+=`\nCLIENT: ${$('cName').value}\n${$('cAddr').value}\n`;
@@ -1035,7 +1039,7 @@ function printEstimate(){
   $('printDoc').innerHTML=`
     <div class="p-head">
       <div class="p-co">${settings.logo?`<img src="${settings.logo}" alt="" style="height:52px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px">`:''}${esc(settings.co)||'Estimate'}
-        <small>${esc(settings.phone)}${settings.email?' · '+esc(settings.email):''}${settings.lic?' · Lic #'+esc(settings.lic):''}</small>
+        <small>${settings.addr?esc(settings.addr)+'<br>':''}${[settings.phone,settings.email,settings.web,settings.lic?'Lic #'+settings.lic:''].filter(Boolean).map(esc).join(' · ')}</small>
       </div>
       <div class="p-est">
         <div class="t">${docType==='invoice'?'Invoice':'Estimate'}</div>
